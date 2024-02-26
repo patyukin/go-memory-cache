@@ -1,32 +1,27 @@
 package main
 
-import "sync"
-
-type Cache interface {
-	Get(key string) (string, error)
-	Set(key, value string)
-}
-
-type CacheImpl struct {
-	mu    sync.RWMutex
-	cache map[string]string
-}
-
-func (c *CacheImpl) Get(key string) (value string, ok bool) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
-	value, ok = c.cache[key]
-
-	return
-}
-
-func (c *CacheImpl) Set(key, value string) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	c.cache[key] = value
-}
+import (
+	"fmt"
+	"github.com/patyukin/go-memory-cache/internal/cache"
+	"log"
+)
 
 func main() {
+	count := 1
+	sc := cache.NewCache(count)
 
+	fmt.Println(sc)
+
+	err := sc.Set("foo", "bar")
+	err = sc.Set("bar", "baz")
+	err = sc.Set("baz", "foo")
+	if err != nil {
+		log.Fatalf("error: %s", err)
+	}
+
+	value1, ok := sc.Get("foo")
+	value2, ok := sc.Get("bar")
+	value3, ok := sc.Get("baz")
+
+	fmt.Println(value1, ok, value2, ok, value3, ok)
 }
